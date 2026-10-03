@@ -1,101 +1,106 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { RiskDashboard } from '@/components/RiskDashboard';
+import { Search, Loader2, ShieldAlert } from 'lucide-react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [riskData, setRiskData] = useState(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleAnalyze = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!address) return;
+
+    setLoading(true);
+    setError('');
+    setRiskData(null);
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze token');
+      }
+
+      const data = await response.json();
+      setRiskData(data);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during analysis.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#0B0F19] text-white p-6 md:p-12 relative overflow-hidden">
+      {/* Background glowing orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto pt-16 md:pt-24 relative z-10">
+        <div className="text-center mb-16">
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-gray-900/50 rounded-2xl border border-gray-800 backdrop-blur-sm shadow-xl">
+              <ShieldAlert className="w-12 h-12 text-purple-400" />
+            </div>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight">
+            Solana <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Risk Analyzer</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+            Instantly audit any Solana smart contract. Detect honeypots, unlocked liquidity, and malicious code before you invest.
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-12">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
+            <div className="relative flex flex-col md:flex-row items-center bg-gray-900/80 border border-gray-700 backdrop-blur-xl rounded-2xl p-2 shadow-2xl">
+              <div className="hidden md:block pl-4 pr-2 text-gray-400">
+                <Search className="w-6 h-6" />
+              </div>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter Solana token address (e.g. DezX...)"
+                className="w-full md:flex-1 bg-transparent border-none p-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:ring-0"
+              />
+              <button
+                type="submit"
+                disabled={loading || !address}
+                className="w-full md:w-auto mt-2 md:mt-0 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Scanning
+                  </>
+                ) : (
+                  'Analyze Token'
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {error && (
+          <div className="max-w-3xl mx-auto mb-8 p-4 bg-red-900/20 border border-red-500/50 text-red-400 rounded-xl flex items-center justify-center backdrop-blur-sm animate-pulse">
+            {error}
+          </div>
+        )}
+
+        <div className="transition-all duration-500 ease-in-out">
+          <RiskDashboard data={riskData} />
+        </div>
+      </div>
+    </main>
   );
 }
